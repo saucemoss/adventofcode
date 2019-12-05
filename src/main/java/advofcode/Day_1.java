@@ -20,7 +20,7 @@ public class Day_1 {
 			int totalFuelReq = 0;
 			while (in != null) {
 				int mass = Integer.parseInt(in);
-				totalFuelReq += fuelReq(mass);
+				totalFuelReq += moduleFuelReq(mass);
 				in = bufferedReader.readLine();
 			}
 			bufferedReader.close();
@@ -32,7 +32,7 @@ public class Day_1 {
 		}
 	}
 
-	public static int fuelReq(int mass) {
+	public static int moduleFuelReq(int mass) {
 		int req = Math.floorDiv(mass, 3) - 2;
 		int totalReq = req;
 		while (Math.floorDiv(req, 3) > 0) {

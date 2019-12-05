@@ -14,8 +14,8 @@ import javax.swing.*;
 
 public class Day_3 extends JPanel {
 
-	static int boardWidth = 50000;
-	static int boardHeight = 50000;
+	static int boardWidth = 25;
+	static int boardHeight = 25;
 	static String board[][] = new String[boardHeight][boardWidth];
 	static int startPosX = boardWidth / 2;
 	static int startPosY = boardHeight / 2;
@@ -29,11 +29,11 @@ public class Day_3 extends JPanel {
 
 		String path3[] = { "R75", "D30", "R83", "U83", "L12", "D49", "R71", "U7", "L72" };
 		String path4[] = { "U62", "R66", "U55", "R34", "D71", "R55", "D58", "R83" };
-		
+
 		String path5[] = { "R98", "U47", "R26", "D63", "R33", "U87", "L62", "D20", "R33", "U53", "R51" };
 		String path6[] = { "U98", "R91", "D20", "R16", "D67", "R40", "U7", "R15", "U6", "R7" };
 
-		//"production" paths
+		// "production" paths
 		String p1 = null;
 		String p2 = null;
 		InputStream inputStream;
@@ -50,19 +50,14 @@ public class Day_3 extends JPanel {
 		String[] path7 = p1.split(",");
 		String[] path8 = p2.split(",");
 
-		// compute
-		translatePath(path7, board);
-		translatePath(path8, board);
-		// printBoard(board, null);
-		getXposDistances(board);
-
-		// graphics
-		JFrame window = new JFrame();
-		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		window.setBounds(0, 0, boardHeight, boardWidth);
-		window.getContentPane().add(new Day_3());
-		window.setVisible(true);
 		
+		// compute
+		//translatePath(path1, board); //feed the board with path 1
+		//translatePath(path2, board); //feed the board with path 2	
+		//printBoard(board, 25, 25); //will look cool with small boards dimensions like 25x25 (path1 and path2), not needed for solution
+		//getXposDistances(board); //compute closest distances
+
+		showVisualisation(path7, path8); //better visual representation of paths/wires, just for fun.
 
 	}
 
@@ -94,13 +89,11 @@ public class Day_3 extends JPanel {
 		int currentPosY = startPosY;
 
 		System.out.println("Instructions for path are: ");
-
 		for (int i = 0; i < path.length; i++) {
+			String sc = path[i].substring(1);
+			int stepCount = Integer.parseInt(sc);
 			if (path[i].charAt(0) == 'R') {
-				String sc = path[i].substring(1);
-				int stepCount = Integer.parseInt(sc);
 				System.out.println("go right " + stepCount + " times, then");
-
 				// input to board coordinates
 				for (int j = 0; j <= stepCount; j++) {
 					if (board[currentPosY][currentPosX + j] == "[#]") {
@@ -110,12 +103,8 @@ public class Day_3 extends JPanel {
 					}
 				}
 				currentPosX += stepCount;
-
 			} else if (path[i].charAt(0) == 'L') {
-				String sc = path[i].substring(1);
-				int stepCount = Integer.parseInt(sc);
 				System.out.println("go left " + stepCount + " times, then");
-
 				// input to board coordinates
 				for (int j = 0; j <= stepCount; j++) {
 					if (board[currentPosY][currentPosX - j] == "[#]") {
@@ -125,12 +114,8 @@ public class Day_3 extends JPanel {
 					}
 				}
 				currentPosX -= stepCount;
-
 			} else if (path[i].charAt(0) == 'U') {
-				String sc = path[i].substring(1);
-				int stepCount = Integer.parseInt(sc);
 				System.out.println("go up " + stepCount + " times, then");
-
 				// input to board coordinates
 				for (int j = 0; j <= stepCount; j++) {
 					if (board[currentPosY - j][currentPosX] == "[#]") {
@@ -141,10 +126,7 @@ public class Day_3 extends JPanel {
 				}
 				currentPosY -= stepCount;
 			} else if (path[i].charAt(0) == 'D') {
-				String sc = path[i].substring(1);
-				int stepCount = Integer.parseInt(sc);
 				System.out.println("go down " + stepCount + " times, then");
-
 				// input to board coordinates
 				for (int j = 0; j <= stepCount; j++) {
 					if (board[currentPosY + j][currentPosX] == "[#]") {
@@ -169,6 +151,12 @@ public class Day_3 extends JPanel {
 		return board;
 	}
 
+	private static void printBoard(String[][] board, int bWidth, int bHeight) {
+		boardWidth = bWidth;
+		boardHeight = bHeight;		
+		printBoard(board);
+	}
+		
 	private static void printBoard(String[][] board) {
 
 		for (int i = 0; i < boardHeight; i++) {
@@ -185,18 +173,96 @@ public class Day_3 extends JPanel {
 
 	}
 
-	public void paint(Graphics g) {
+	public static void showVisualisation(String[] path1, String[] path2) {
 		
-		for (int i = 0; i < boardHeight; i++) {
-			for (int j = 0; j < boardWidth; j++) {
-				if (board[i][j] == "[#]") {
-					g.drawRect((j/10000), (i/10000), 1, 1);
-				}
-				if (board[i][j] == "[X]") {
-					g.fillRect((j/10000) - 2, (i/10000) - 2, 6, 6);
-				}
-				g.fillOval((startPosY/10000) - 5, (startPosX/10000) - 5, 10, 10);
+		// graphics
+		JFrame window = new JFrame();
+		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		window.setBounds(100, 100, 1200, 800);		
+		window.getContentPane().add(new Visualisation(path1, path2));
+		window.setVisible(true);
+	}
+}
+
+class Visualisation extends JPanel {
+
+    int x1 = 0;
+    int y1 = 0;
+    int x2 = 0;
+    int y2 = 0;
+
+    ArrayList<Integer[]> linesOfPath1 = new ArrayList<Integer[]>();
+    ArrayList<Integer[]> linesOfPath2 = new ArrayList<Integer[]>();
+    
+	int scale = 40;
+	
+	int startPosX = 600 * scale;
+	int startPosY = 400 * scale;
+    
+	public Visualisation(String[] path1, String[] path2) {
+
+		linesOfPath1 = getLinesOfPath(path1);
+		linesOfPath2 = getLinesOfPath(path2);
+
+	}
+
+	private ArrayList<Integer[]> getLinesOfPath (String[] path) {
+		int currentPosX = startPosX;
+		int currentPosY = startPosY;
+		ArrayList<Integer[]> lines = new ArrayList<Integer[]>();
+		for (int i = 0; i < path.length; i++) {
+			String sc = path[i].substring(1);
+			int stepCount = Integer.parseInt(sc);
+			if (path[i].charAt(0) == 'R') {												
+				x1 = currentPosX;
+				y1 = currentPosY;
+				x2 = (currentPosX + stepCount);
+				y2 = currentPosY;				
+				Integer[] pos = { x1, y1, x2, y2 } ;
+				lines.add(pos);
+				currentPosX += stepCount;				
+			} else if (path[i].charAt(0) == 'L') {				
+				x1 = currentPosX;
+				y1 = currentPosY;
+				x2 = (currentPosX - stepCount);
+				y2 = currentPosY;				
+				Integer[] pos = { x1, y1, x2, y2 } ;
+				lines.add(pos);
+				currentPosX -= stepCount;
+			} else if (path[i].charAt(0) == 'U') {
+				x1 = currentPosX;
+				y1 = currentPosY;
+				x2 = currentPosX;
+				y2 = (currentPosY - stepCount);				
+				Integer[] pos = { x1, y1, x2, y2 } ;
+				lines.add(pos);
+				currentPosY -= stepCount;				
+			} else if (path[i].charAt(0) == 'D') {	
+				x1 = currentPosX;
+				y1 = currentPosY;
+				x2 = currentPosX;
+				y2 = (currentPosY + stepCount);				
+				Integer[] pos = { x1, y1, x2, y2 } ;
+				lines.add(pos);
+				currentPosY += stepCount;
 			}
+		}
+		return lines;
+	}
+
+	protected void paintComponent(Graphics g) {
+		super.paintComponent(g); 
+		g.setColor(Color.RED);
+		for(int i = 0; i < linesOfPath1.size(); i++) {
+		Integer[] a = linesOfPath1.get(i);
+		g.drawLine(a[0]/scale, a[1]/scale, a[2]/scale, a[3]/scale);
+		}
+		
+		g.setColor(Color.BLUE);
+		
+		for(int i = 0; i < linesOfPath2.size(); i++) {
+		Integer[] a = linesOfPath2.get(i);
+		g.drawLine(a[0]/scale, a[1]/scale, a[2]/scale, a[3]/scale);
 		}
 	}
 
