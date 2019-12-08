@@ -14,12 +14,21 @@ import javax.swing.*;
 
 public class Day_3 extends JPanel {
 
-	static int boardWidth = 25;
-	static int boardHeight = 25;
-	static String board[][] = new String[boardHeight][boardWidth];
-	static int startPosX = boardWidth / 2;
-	static int startPosY = boardHeight / 2;
 	private static BufferedReader bufferedReader;
+	static ArrayList<Integer[]> pointsOfPath1 = new ArrayList<Integer[]>();
+	static ArrayList<Integer[]> pointsOfPath2 = new ArrayList<Integer[]>();
+	static ArrayList<Integer[]> xs = new ArrayList<Integer[]>();
+	static ArrayList<Integer> xsteps = new ArrayList<Integer>();
+	static int minstep = 0;
+	static int minx = 0;
+	static int scale = 30;
+	static Integer[] manhattanPoint;
+
+	static int startPosX = 950 * scale;
+	static int startPosY = 500 * scale;
+	static JFrame window = new JFrame();
+
+	static boolean done = false;
 
 	public static void main(String[] args) {
 
@@ -49,221 +58,186 @@ public class Day_3 extends JPanel {
 		}
 		String[] path7 = p1.split(",");
 		String[] path8 = p2.split(",");
-
-		
-		// compute
-		//translatePath(path1, board); //feed the board with path 1
-		//translatePath(path2, board); //feed the board with path 2	
-		//printBoard(board, 25, 25); //will look cool with small boards dimensions like 25x25 (path1 and path2), not needed for solution
-		//getXposDistances(board); //compute closest distances
-
-		showVisualisation(path7, path8); //better visual representation of paths/wires, just for fun.
-
-	}
-
-	private static void getXposDistances(String[][] board2) {
-		ArrayList<Integer> xpos = new ArrayList<Integer>();
-		for (int i = 0; i < boardHeight; i++) {
-			for (int j = 0; j < boardWidth; j++) {
-				if (board[i][j] == "[X]") {
-					int x = Math.abs(startPosY - j) + Math.abs(startPosX - i);
-					xpos.add(x);
-					System.out.println("x = " + j + ", y = " + i + ". Total distance from center is: " + x);
-				}
-			}
-		}
-
-		Collections.sort(xpos);
-		if (xpos.get(0) == 0) {
-			System.out.println(
-					"The closest point of intersection from the center is " + xpos.get(1) + " grid tiles away.");
-		} else {
-			System.out.println(
-					"The closest point of intersection from the center is " + xpos.get(0) + " grid tiles away.");
-		}
-	}
-
-	private static String[][] translatePath(String[] path, String[][] board) {
-
-		int currentPosX = startPosX;
-		int currentPosY = startPosY;
-
-		System.out.println("Instructions for path are: ");
-		for (int i = 0; i < path.length; i++) {
-			String sc = path[i].substring(1);
-			int stepCount = Integer.parseInt(sc);
-			if (path[i].charAt(0) == 'R') {
-				System.out.println("go right " + stepCount + " times, then");
-				// input to board coordinates
-				for (int j = 0; j <= stepCount; j++) {
-					if (board[currentPosY][currentPosX + j] == "[#]") {
-						board[currentPosY][currentPosX + j] = "[X]";
-					} else {
-						board[currentPosY][currentPosX + j] = "[.]";
-					}
-				}
-				currentPosX += stepCount;
-			} else if (path[i].charAt(0) == 'L') {
-				System.out.println("go left " + stepCount + " times, then");
-				// input to board coordinates
-				for (int j = 0; j <= stepCount; j++) {
-					if (board[currentPosY][currentPosX - j] == "[#]") {
-						board[currentPosY][currentPosX - j] = "[X]";
-					} else {
-						board[currentPosY][currentPosX - j] = "[.]";
-					}
-				}
-				currentPosX -= stepCount;
-			} else if (path[i].charAt(0) == 'U') {
-				System.out.println("go up " + stepCount + " times, then");
-				// input to board coordinates
-				for (int j = 0; j <= stepCount; j++) {
-					if (board[currentPosY - j][currentPosX] == "[#]") {
-						board[currentPosY - j][currentPosX] = "[X]";
-					} else {
-						board[currentPosY - j][currentPosX] = "[.]";
-					}
-				}
-				currentPosY -= stepCount;
-			} else if (path[i].charAt(0) == 'D') {
-				System.out.println("go down " + stepCount + " times, then");
-				// input to board coordinates
-				for (int j = 0; j <= stepCount; j++) {
-					if (board[currentPosY + j][currentPosX] == "[#]") {
-						board[currentPosY + j][currentPosX] = "[X]";
-					} else {
-						board[currentPosY + j][currentPosX] = "[.]";
-					}
-				}
-				currentPosY += stepCount;
-			}
-		}
-		System.out.println("end.\n");
-
-		for (int i = 0; i < boardHeight; i++) {
-			for (int j = 0; j < boardWidth; j++) {
-				if (board[i][j] == "[.]") {
-					board[i][j] = "[#]";
-				}
-			}
-		}
-
-		return board;
-	}
-
-	private static void printBoard(String[][] board, int bWidth, int bHeight) {
-		boardWidth = bWidth;
-		boardHeight = bHeight;		
-		printBoard(board);
-	}
-		
-	private static void printBoard(String[][] board) {
-
-		for (int i = 0; i < boardHeight; i++) {
-			for (int j = 0; j < boardWidth; j++) {
-				if (board[i][j] == null) {
-					board[i][j] = "[_]";
-				}
-				board[startPosY][startPosX] = "[o]";
-
-				System.out.print(board[i][j]);
-			}
-			System.out.println();
-		}
+		manhattanPoint = new Integer[2];
+		// compute + visualization
+		showVisualisation(path7, path8);
+		xs = getXs();
 
 	}
 
 	public static void showVisualisation(String[] path1, String[] path2) {
-		
+
+		pointsOfPath1 = getPointsOfPath(path1);
+		pointsOfPath2 = getPointsOfPath(path2);
+
 		// graphics
-		JFrame window = new JFrame();
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		window.setBounds(100, 100, 1200, 800);		
-		window.getContentPane().add(new Visualisation(path1, path2));
+		window.setBounds(0, 0, 1900, 1000);
+		window.getContentPane()
+				.add(new Visualisation(pointsOfPath1, pointsOfPath2, scale, xs, manhattanPoint, startPosX, startPosY));
 		window.setVisible(true);
 	}
+
+	private static ArrayList<Integer[]> getPointsOfPath(String[] path) {
+		int currentPosX = startPosX;
+		int currentPosY = startPosY;
+		int totalStepsToThisPoint = 0;
+		ArrayList<Integer[]> points = new ArrayList<Integer[]>();
+
+		for (int i = 0; i < path.length; i++) {
+			String sc = path[i].substring(1);
+			int stepCount = Integer.parseInt(sc);
+			if (path[i].charAt(0) == 'R') {
+				for (int j = 0; j < stepCount; j++) {
+					Integer[] xy = new Integer[3];
+					xy[0] = currentPosX + j;
+					xy[1] = currentPosY;
+					xy[2] = totalStepsToThisPoint;
+					points.add(xy);
+					totalStepsToThisPoint++;
+				}
+				currentPosX += stepCount;
+			} else if (path[i].charAt(0) == 'L') {
+				for (int j = 0; j < stepCount; j++) {
+					Integer[] xy = new Integer[3];
+					xy[0] = currentPosX - j;
+					xy[1] = currentPosY;
+					xy[2] = totalStepsToThisPoint;
+					points.add(xy);
+					totalStepsToThisPoint++;
+				}
+				currentPosX -= stepCount;
+			} else if (path[i].charAt(0) == 'U') {
+				for (int j = 0; j < stepCount; j++) {
+					Integer[] xy = new Integer[3];
+					xy[0] = currentPosX;
+					xy[1] = currentPosY - j;
+					xy[2] = totalStepsToThisPoint;
+					points.add(xy);
+					totalStepsToThisPoint++;
+				}
+				currentPosY -= stepCount;
+			} else if (path[i].charAt(0) == 'D') {
+				for (int j = 0; j < stepCount; j++) {
+					Integer[] xy = new Integer[3];
+					xy[0] = currentPosX;
+					xy[1] = currentPosY + j;
+					xy[2] = totalStepsToThisPoint;
+					points.add(xy);
+					totalStepsToThisPoint++;
+				}
+				currentPosY += stepCount;
+			}
+
+		}
+		return points;
+	}
+
+	private static ArrayList<Integer[]> getXs() {
+		int prev = 0;
+
+		for (int x = 0; x < pointsOfPath1.size(); x++) {
+			Integer p1[] = pointsOfPath1.get(x);
+			for (int y = 0; y < pointsOfPath2.size(); y++) {
+				Integer p2[] = pointsOfPath2.get(y);
+				if (p1[0].equals(p2[0]) && p1[1].equals(p2[1])) {
+					System.out.println(
+							"Bingo! At " + p1[0] + " and " + p1[1] + ". Steps to reach this point for red wire: "
+									+ p1[2] + ". Blue wire: " + p2[2] + ". Total steps: " + (p1[2] + p2[2]));
+					xs.add(p1);
+					if ((p1[2] + p2[2]) != 0) {
+						xsteps.add(p1[2] + p2[2]);
+					}
+				}
+			}
+			int percentDone = (x * 100) / pointsOfPath1.size();
+			if (prev != percentDone) {
+
+				window.repaint();
+				prev = percentDone;
+				if (percentDone == 100) {
+					done = true;
+				}
+				System.out.println(percentDone + "%");
+			}
+		}
+
+		ArrayList<Integer> manhattanPoints = new ArrayList<Integer>();
+
+		for (int i = 0; i < xs.size(); i++) {
+			Integer p[] = xs.get(i);
+			int x = Math.abs(startPosY - p[1]) + Math.abs(startPosX - p[0]);
+			if (x != 0) {
+				manhattanPoints.add(x);
+			}
+		}
+		minstep = Collections.min(xsteps);
+		minx = Collections.min(manhattanPoints);
+		Integer p[] = xs.get(manhattanPoints.indexOf(minx) + 1);
+		System.out.println("Done. Manhattan distance: " + minx + " at coordinates " + p[0] + ", " + p[1]
+				+ ". Fewest steps to intersection: " + Collections.min(xsteps));
+		manhattanPoint[0] = p[0];
+		manhattanPoint[1] = p[1];
+		window.repaint();
+		return xs;
+
+	}
+
 }
 
 class Visualisation extends JPanel {
 
-    int x1 = 0;
-    int y1 = 0;
-    int x2 = 0;
-    int y2 = 0;
+	ArrayList<Integer[]> pointsOfPath1;
+	ArrayList<Integer[]> pointsOfPath2;
+	ArrayList<Integer[]> xs;
+	Integer[] manhattanPoint;
+	int startPosX;
+	int startPosY;
 
-    ArrayList<Integer[]> linesOfPath1 = new ArrayList<Integer[]>();
-    ArrayList<Integer[]> linesOfPath2 = new ArrayList<Integer[]>();
-    
-	int scale = 40;
-	
-	int startPosX = 600 * scale;
-	int startPosY = 400 * scale;
-    
-	public Visualisation(String[] path1, String[] path2) {
+	int scale;
 
-		linesOfPath1 = getLinesOfPath(path1);
-		linesOfPath2 = getLinesOfPath(path2);
-
-	}
-
-	private ArrayList<Integer[]> getLinesOfPath (String[] path) {
-		int currentPosX = startPosX;
-		int currentPosY = startPosY;
-		ArrayList<Integer[]> lines = new ArrayList<Integer[]>();
-		for (int i = 0; i < path.length; i++) {
-			String sc = path[i].substring(1);
-			int stepCount = Integer.parseInt(sc);
-			if (path[i].charAt(0) == 'R') {												
-				x1 = currentPosX;
-				y1 = currentPosY;
-				x2 = (currentPosX + stepCount);
-				y2 = currentPosY;				
-				Integer[] pos = { x1, y1, x2, y2 } ;
-				lines.add(pos);
-				currentPosX += stepCount;				
-			} else if (path[i].charAt(0) == 'L') {				
-				x1 = currentPosX;
-				y1 = currentPosY;
-				x2 = (currentPosX - stepCount);
-				y2 = currentPosY;				
-				Integer[] pos = { x1, y1, x2, y2 } ;
-				lines.add(pos);
-				currentPosX -= stepCount;
-			} else if (path[i].charAt(0) == 'U') {
-				x1 = currentPosX;
-				y1 = currentPosY;
-				x2 = currentPosX;
-				y2 = (currentPosY - stepCount);				
-				Integer[] pos = { x1, y1, x2, y2 } ;
-				lines.add(pos);
-				currentPosY -= stepCount;				
-			} else if (path[i].charAt(0) == 'D') {	
-				x1 = currentPosX;
-				y1 = currentPosY;
-				x2 = currentPosX;
-				y2 = (currentPosY + stepCount);				
-				Integer[] pos = { x1, y1, x2, y2 } ;
-				lines.add(pos);
-				currentPosY += stepCount;
-			}
-		}
-		return lines;
+	public Visualisation(ArrayList<Integer[]> pointsOfPath12, ArrayList<Integer[]> pointsOfPath22, int s,
+			ArrayList<Integer[]> x, Integer[] mp, int spX, int spY) {
+		pointsOfPath1 = pointsOfPath12;
+		pointsOfPath2 = pointsOfPath22;
+		startPosX = spX;
+		startPosY = spY;
+		manhattanPoint = mp;
+		xs = x;
+		scale = s;
 	}
 
 	protected void paintComponent(Graphics g) {
-		super.paintComponent(g); 
+
+		super.paintComponent(g);
+		g.setColor(Color.BLACK);
+		g.fillRect(0, 0, 1900, 1000);
+
 		g.setColor(Color.RED);
-		for(int i = 0; i < linesOfPath1.size(); i++) {
-		Integer[] a = linesOfPath1.get(i);
-		g.drawLine(a[0]/scale, a[1]/scale, a[2]/scale, a[3]/scale);
+		for (int i = 0; i < pointsOfPath1.size(); i++) {
+			Integer[] xy = pointsOfPath1.get(i);
+			g.drawOval(xy[0] / scale, xy[1] / scale, 1, 1);
+
 		}
-		
 		g.setColor(Color.BLUE);
-		
-		for(int i = 0; i < linesOfPath2.size(); i++) {
-		Integer[] a = linesOfPath2.get(i);
-		g.drawLine(a[0]/scale, a[1]/scale, a[2]/scale, a[3]/scale);
+		for (int i = 0; i < pointsOfPath2.size(); i++) {
+			Integer[] xy = pointsOfPath2.get(i);
+			g.drawOval(xy[0] / scale, xy[1] / scale, 1, 1);
+
 		}
+
+		g.setColor(Color.YELLOW);
+		for (int i = 0; i < xs.size(); i++) {
+			Integer _xs[] = xs.get(i);
+			g.fillRect((_xs[0] / scale) - 1, (_xs[1] / scale) - 1, 5, 5);
+
+		}
+		g.setColor(Color.GREEN);
+		if (manhattanPoint[0] != null && manhattanPoint[1] != null) {
+			g.drawOval((manhattanPoint[0] / scale) - 3, (manhattanPoint[1] / scale) - 3, 8, 8);
+		}
+		g.setColor(Color.PINK);
+		g.fillOval((startPosX / scale) - 3, (startPosY / scale) - 3, 8, 8);
 	}
 
 }
