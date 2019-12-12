@@ -21,7 +21,7 @@ public class Day_3 extends JPanel {
 	static ArrayList<Integer> xsteps = new ArrayList<Integer>();
 	static int minstep = 0;
 	static int minx = 0;
-	static int scale = 30;
+	static int scale = 15;
 	static Integer[] manhattanPoint;
 
 	static int startPosX = 950 * scale;
