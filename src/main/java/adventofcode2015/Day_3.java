@@ -56,9 +56,9 @@ public class Day_3 {
 
 		for (int i = 0; i < line.length; i++) {
 			char arrow = line[i];
-			int[] posXY = move(arrow, sanPosX, sanPosY);
-			sanPosX = posXY[0];
-			sanPosY = posXY[1];
+			int[] posXY = move(arrow, posX, posY);
+			posX = posXY[0];
+			posY = posXY[1];
 			positions.add(posXY[0] + ", " + posXY[1]);
 		}
 
