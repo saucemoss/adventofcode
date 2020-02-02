@@ -22,7 +22,7 @@ public class Day_3 {
 
 		partOne(line);
 		partTwo(line);
-				
+
 	}
 
 	private static void partTwo(char[] line) {
@@ -31,21 +31,38 @@ public class Day_3 {
 
 		for (int i = 0; i < line.length; i++) {
 			char arrow = line[i];
-			if(i%2==0) {			
+			if (i % 2 == 0) {
 				int[] posXY = move(arrow, sanPosX, sanPosY);
 				sanPosX = posXY[0];
-				sanPosY = posXY[1];				
-				positionsSanta.add(posXY[0] +", " + posXY[1]);
-			}else {
+				sanPosY = posXY[1];
+				positionsSanta.add(posXY[0] + ", " + posXY[1]);
+			} else {
 				int[] posXY = move(arrow, roboPosX, roboPosY);
 				roboPosX = posXY[0];
-				roboPosY = posXY[1];				
-				positionsRobo.add(posXY[0] +", " + posXY[1]);
+				roboPosY = posXY[1];
+				positionsRobo.add(posXY[0] + ", " + posXY[1]);
 			}
 		}
-		
+
 		positionsSanta.addAll(positionsRobo);
 		System.out.println(positionsSanta.stream().filter(i -> Collections.frequency(positionsSanta, i) >= 1)
+				.collect(Collectors.toSet()).size());
+	}
+
+	private static void partOne(char[] line) {
+		int posX = 0;
+		int posY = 0;
+		ArrayList<String> positions = new ArrayList<String>();
+
+		for (int i = 0; i < line.length; i++) {
+			char arrow = line[i];
+			int[] posXY = move(arrow, sanPosX, sanPosY);
+			sanPosX = posXY[0];
+			sanPosY = posXY[1];
+			positions.add(posXY[0] + ", " + posXY[1]);
+		}
+
+		System.out.println(positions.stream().filter(i -> Collections.frequency(positions, i) >= 1)
 				.collect(Collectors.toSet()).size());
 	}
 
@@ -64,39 +81,8 @@ public class Day_3 {
 			posY++;
 			break;
 		}
-		
-		int[] posXY = {posX, posY};
+
+		int[] posXY = { posX, posY };
 		return posXY;
-	} 
-
-	private static void partOne(char[] line) {
-		int posX = 0;
-		int posY = 0;
-		ArrayList<String> positions = new ArrayList<String>();
-
-		for (int i = 0; i < line.length; i++) {
-
-			switch (line[i]) {
-			case '^':
-				posY--;
-				break;
-			case '>':
-				posX++;
-				break;
-			case '<':
-				posX--;
-				break;
-			case 'v':
-				posY++;
-				break;
-			}
-
-			String posXY = posX + ", " + posY;
-			positions.add(posXY);
-		}
-
-		System.out.println(positions.stream().filter(i -> Collections.frequency(positions, i) >= 1)
-				.collect(Collectors.toSet()).size());
 	}
-
 }
