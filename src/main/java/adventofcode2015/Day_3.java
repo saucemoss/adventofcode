@@ -10,10 +10,6 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 public class Day_3 {
-	static int sanPosX = 0;
-	static int sanPosY = 0;
-	static int roboPosX = 0;
-	static int roboPosY = 0;
 
 	public static void main(String[] args) throws IOException {
 		InputStream is = new FileInputStream("src/main/resources/2015/Day_3_puzzle_input.txt");
@@ -28,6 +24,10 @@ public class Day_3 {
 	private static void partTwo(char[] line) {
 		ArrayList<String> positionsSanta = new ArrayList<String>();
 		ArrayList<String> positionsRobo = new ArrayList<String>();
+		int sanPosX = 0;
+		int sanPosY = 0;
+		int roboPosX = 0;
+		int roboPosY = 0;
 
 		for (int i = 0; i < line.length; i++) {
 			char arrow = line[i];
